@@ -1,0 +1,1 @@
+from daily.quick_sort import quicksort

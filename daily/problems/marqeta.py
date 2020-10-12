@@ -11,13 +11,7 @@ def analyze(input):
     tokens = input.split()
     lex = list()
     count = dict()
-    
-    low = 0
-    buf_length = 10
-    
-    while low < len(input):
-        buf = input[low:low+buf_length]        
-        
+
     for s in tokens:
         if s in count.keys():
             count[s]= count[s]+1
