@@ -12,6 +12,16 @@ Load balancing:
     3. The containers will handle the snmp traffic, POSTs and issuing DB calls.
 
 Bugs:
+    2. Receive email:
+        1. It appears there's a race condition in how the emails are received. When POST is processed
+            we generate a unique ID for the email...that typically ends up being an index for DB. And 
+            only then hte insertion into the DB is performed. If 2 POSTs are being processed at the 
+            same time it's possible for them to generate a non-unique index, 1st one to insert it into
+            DB wins, 2nd one errors out.
+            We should let the emails table handle the indexing of the emails upon insertion.
+        2. WHat if the insertion works but send back fails? Is htere a retry mechanism? How do we avoid
+            being sent a POST with same hook for same email?
+
     1. Send email: Recepient receives a strange error, email is sent but not stored?
         1. First, the email unique ID is generated. That ID is possibly a hash...or it could be That
             the email content has some invalid characters that would cause a failure to insert the 
@@ -20,3 +30,7 @@ Bugs:
         2. We could rewrite the send to actually write the DB always. The backend should 
             retry to send the email if POST to /send fails.
 
+
+Questions for interview:
+1. How is the remote working out for the teams. Have the procedures/agile meetings changed?
+2. What time is spent with customer issues. Elaborate on urgency/etc.

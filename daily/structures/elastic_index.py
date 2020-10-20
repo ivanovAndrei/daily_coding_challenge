@@ -1,37 +1,46 @@
 import re
 import string
 
-class ElasticIndex():
+class SearchIndex():
     def __init__(self):
-        self._freq = dict()
         self._docs = dict()
+        self._inputs = dict()
 
-    def add_terms(self, input:str, input_id:int):
-        translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-        input = input.translate(translator)
+    @property
+    def original_documents(self):
+        return self._inputs
+
+    def add(self, id:int, input:str):
+        if id not in self._inputs.keys():
+            self._inputs[id] = input
+
+        input = re.sub('^[a-zA-Z0-9]', ' ', input)
         groups = input.split()
 
         for g in groups:
-            if g in self._freq.keys():
-                self._freq[g] = self._freq[g]+1
-                self._docs[g].append(input_id)
+            frequency = input.count(g)
+            if g in self._docs.keys() and not any([n for n in self._docs[g] if n[0] == id]):
+                self._docs[g].append((id, frequency))
             else:
-                self._freq[g] = 1
-                self._docs[g] = [input_id]
+                self._docs[g] = [(id, frequency)]
 
     def print_data(self):
-        print(self._freq)
         print(self._docs)
 
-    def find_string(self, input:str)->int:
-        if input in self._freq.keys():
-            print(f"Found string {input} {self._freq[input]} times in these docs: {self._docs[input]}")
+    def search(self, input:str)->list:
+        """
+        :param str input: Input search string
+        :rtype: list
+        :returns list of document indices
+        """
+        return_list = []
+        if input in self._docs.keys():
+            return_list = self._docs[input]
+        return return_list
 
 
-
-index = ElasticIndex()
-index.add_terms("Mary had a little lamb", 1)
-index.add_terms("Trex had tiny arms", 2)
-index.add_terms("Mary the vecociraptor had long arms she could rip lambs to pieces with", 3)
-index.print_data()
-index.find_string("had")
+index = SearchIndex()
+index.add(0, "some more examples")
+index.add(1, "Examples are great for examples of examples")
+indices = index.search("examples")
+print(indices)
