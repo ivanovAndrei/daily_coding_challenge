@@ -1,0 +1,22 @@
+DB improvements:
+    1. Create a table of message texts with message hash as a primary key.
+    2. Instead of message field in emails table, use hash as a foreign key.
+    3. This allows us to dedup identical messages sent to multiple recepients
+    4. BULK WRITE, cache the messages themselves in a journal (so perhaps the above new 
+        table may have NULL for text which means it's cached in memory) until threshold/expiration
+        is reached and data is cached.
+    
+Load balancing:
+    1. Start multiple docker containers
+    2. Setup a VM with nginx and round robin setup for multiple docker containers
+    3. The containers will handle the snmp traffic, POSTs and issuing DB calls.
+
+Bugs:
+    1. Send email: Recepient receives a strange error, email is sent but not stored?
+        1. First, the email unique ID is generated. That ID is possibly a hash...or it could be That
+            the email content has some invalid characters that would cause a failure to insert the 
+            email message into the DB. 2nd step in the process should be to sanitize all inputs and
+            ensure that the ID is valid.
+        2. We could rewrite the send to actually write the DB always. The backend should 
+            retry to send the email if POST to /send fails.
+
